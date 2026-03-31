@@ -1,0 +1,158 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  USER
+  OWNER
+  ADMIN
+}
+
+// ─────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────
+model User {
+  id            Int      @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  email         String   @unique
+  phone_number  String?
+  password      String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  profile_image String?
+  role          Role     @default(USER)
+
+  // Relations
+  reservations   Reservation[]
+  reviews        Review[]
+  ownedStores    Store[]              @relation("StoreOwner")
+  historyAsUser  HistoryReservation[] @relation("HistoryUser")
+  historyAsOwner HistoryReservation[] @relation("HistoryOwner")
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// STORE
+// ─────────────────────────────────────────
+model Store {
+  id               Int      @id @default(autoincrement())
+  store_type       String
+  pet_type         String
+  total_storeentry Int
+  total_table      Int
+  total_pet        Int
+  summary          String
+  address          String
+  price            Int
+  open_datetime    String
+  owner_id         Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  // Relations
+  owner        User                 @relation("StoreOwner", fields: [owner_id], references: [id])
+  reservations Reservation[]
+  history      HistoryReservation[]
+  media        Media[]              @relation("StoreMedia")
+  reviews      Review[]
+
+  @@map("store")
+}
+
+// ─────────────────────────────────────────
+// RESERVATIONS
+// ─────────────────────────────────────────
+model Reservation {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  store_id    Int
+  start_date  DateTime
+  end_date    DateTime
+  price       Int
+  total_guest Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relations
+  user                User                 @relation(fields: [user_id], references: [id])
+  store               Store                @relation(fields: [store_id], references: [id])
+  review              Review?
+  historyReservations HistoryReservation[]
+
+  @@map("reservations")
+}
+
+// ─────────────────────────────────────────
+// HISTORY RESERVATION
+// ─────────────────────────────────────────
+model HistoryReservation {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  store_id      Int
+  owner_id      Int
+  reservationId Int      @unique
+  pet_type      String
+  total_table   Int
+  total_pet     Int
+  summary       String
+  address       String
+  price         Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relations
+  user        User        @relation("HistoryUser", fields: [user_id], references: [id])
+  store       Store       @relation(fields: [store_id], references: [id])
+  owner       User        @relation("HistoryOwner", fields: [owner_id], references: [id])
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+
+  @@map("history_reservation")
+}
+
+// ─────────────────────────────────────────
+// REVIEWS
+// ─────────────────────────────────────────
+model Review {
+  id             Int    @id @default(autoincrement())
+  reservation_id Int    @unique
+  user_id        Int
+  rating         Int
+  comment        String @db.VarChar(1000)
+  store_id       Int
+
+  // Relations
+  reservation Reservation @relation(fields: [reservation_id], references: [id])
+  user        User        @relation(fields: [user_id], references: [id])
+  media       Media[]     @relation("ReviewMedia")
+  store       Store       @relation(fields: [store_id], references: [id])
+
+  @@map("reviews")
+}
+
+// ─────────────────────────────────────────
+// MEDIA
+// ─────────────────────────────────────────
+model Media {
+  id         Int    @id @default(autoincrement())
+  model_id   Int
+  url        String
+  review_id  Int?
+  store_id   Int?
+  store_type String
+  pet_type   Int
+
+  // Relations
+  review Review? @relation("ReviewMedia", fields: [review_id], references: [id])
+  store  Store?  @relation("StoreMedia", fields: [store_id], references: [id])
+
+  @@map("media")
+}
