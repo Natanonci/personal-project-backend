@@ -7,7 +7,7 @@ const reservationRouter = express.Router()
 reservationRouter.get('/', authenticate, getMyReservations)
 reservationRouter.get('/:id', authenticate, getReservationById)
 reservationRouter.post('/', authenticate, createReservation)
-reservationRouter.put("/:id",authenticate,editReservation)
+reservationRouter.patch("/:id",authenticate,editReservation)
 reservationRouter.delete('/:id', authenticate, deleteReservation)
 
 

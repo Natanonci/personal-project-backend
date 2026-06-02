@@ -2,9 +2,40 @@ import { prisma } from "../lib/prisma.js"
 import createHttpError from 'http-errors'
 
 export async function getAllStores(req, res, next) {
-    const stores = await prisma.store.findMany({})
-    res.json(stores)
-}
+   try {
+        const { type, search } = req.query; // รับค่าที่หน้าเว็บส่งมา
+
+        // 🟢 สร้างกล่องเก็บเงื่อนไข
+        const whereClause = {};
+
+        // เงื่อนไขที่ 1: ถ้ากดเลือกหมวดหมู่มา ต้องตรงหมวดหมู่นั้นเป๊ะๆ
+        if (type) {
+            whereClause.store_type = type;
+        }
+
+        // เงื่อนไขที่ 2: ถ้ามีการพิมพ์ค้นหามา
+        if (search) {
+            // บังคับให้หา "เฉพาะในชื่อร้าน" หรือ "ประเภทสัตว์" เท่านั้น! ห้ามไปหาใน summary
+            whereClause.OR = [
+                { store_name: { contains: search} },
+                { pet_type: { contains: search} }
+            ];
+        }
+
+        // ดึงข้อมูลจากฐานข้อมูล
+        const stores = await prisma.store.findMany({
+            where: whereClause,
+            orderBy: {
+                created_at: 'desc' // เรียงร้านใหม่ล่าสุดขึ้นก่อน
+            }
+        });
+
+        res.json(stores);
+    } catch (error) {
+        console.error("Get Stores Error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
 
 export async function getStoreById(req, res, next) {
     const storeId = +req.params.id
@@ -20,6 +51,7 @@ export async function createStore(req, res, next) {
     const store = await prisma.store.create({
         data: {
             store_type,
+            store_name,
             pet_type,
             total_storeentry: +total_storeentry,
             total_table: +total_table,
@@ -57,6 +89,7 @@ export async function updateStore(req, res, next) {
         where: { id: storeId },
         data: {
             store_type,
+            store_name,
             pet_type,
             total_storeentry: +total_storeentry,
             total_table: +total_table,

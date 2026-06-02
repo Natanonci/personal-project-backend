@@ -46,6 +46,7 @@ model User {
 model Store {
   id               Int      @id @default(autoincrement())
   store_type       String
+  store_name       String
   pet_type         String
   total_storeentry Int
   total_table      Int
@@ -55,6 +56,7 @@ model Store {
   price            Int
   open_datetime    String
   owner_id         Int
+  url              String
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -113,7 +115,7 @@ model HistoryReservation {
   user        User        @relation("HistoryUser", fields: [user_id], references: [id])
   store       Store       @relation(fields: [store_id], references: [id])
   owner       User        @relation("HistoryOwner", fields: [owner_id], references: [id])
-  reservation Reservation @relation(fields: [reservationId], references: [id])
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 
   @@map("history_reservation")
 }

@@ -7,7 +7,7 @@ const authRouter = express.Router()
 authRouter.post("/register", register)
 authRouter.post('/login', login)
 authRouter.get('/me', authenticate, me)
-authRouter.put('/me/profile', authenticate, editProfile)
+authRouter.patch('/me/profile', authenticate, editProfile)
 authRouter.delete('/me', authenticate, deleteAccount)
 
 export default authRouter
