@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -155,10 +156,6 @@ model Media {
   // Relations
   review Review? @relation("ReviewMedia", fields: [review_id], references: [id])
   store  Store?  @relation("StoreMedia", fields: [store_id], references: [id])
-
-  @@map("media")
-}
-ore_id], references: [id])
 
   @@map("media")
 }

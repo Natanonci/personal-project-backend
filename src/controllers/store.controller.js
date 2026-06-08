@@ -32,8 +32,12 @@ export async function getAllStores(req, res, next) {
 
         res.json(stores);
     } catch (error) {
-        console.error("Get Stores Error:", error);
-        res.status(500).json({ message: "Internal server error" });
+        console.error("Get Stores Error details:", error.message);
+        console.error("Full Error:", error);
+        res.status(500).json({ 
+            message: "Internal server error",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 
@@ -46,12 +50,12 @@ export async function getStoreById(req, res, next) {
 
 export async function createStore(req, res, next) {
     const ownerId = req.user.id
-    const { store_type, pet_type, total_storeentry, total_table, total_pet, summary, address, price, open_datetime } = req.body
+    const { store_name, store_type, pet_type, total_storeentry, total_table, total_pet, summary, address, price, open_datetime, url } = req.body
 
     const store = await prisma.store.create({
         data: {
-            store_type,
             store_name,
+            store_type,
             pet_type,
             total_storeentry: +total_storeentry,
             total_table: +total_table,
@@ -60,6 +64,7 @@ export async function createStore(req, res, next) {
             address,
             price: +price,
             open_datetime,
+            url,
             owner_id: ownerId
         },
         select: {
@@ -78,7 +83,7 @@ export async function createStore(req, res, next) {
 export async function updateStore(req, res, next) {
     const storeId = +req.params.id
     const ownerId = +req.user.id
-    const { store_name, store_type, pet_type, total_storeentry, total_table, total_pet, summary, address, price, open_datetime } = req.body
+    const { store_name, store_type, pet_type, total_storeentry, total_table, total_pet, summary, address, price, open_datetime, url } = req.body
 
     const store = await prisma.store.findUnique({ where: { id: storeId } })
     if (!store) {
@@ -98,6 +103,7 @@ export async function updateStore(req, res, next) {
             address,
             price: +price,
             open_datetime,
+            url,
             owner_id: ownerId
         }
     })
