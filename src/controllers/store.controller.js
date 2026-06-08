@@ -78,7 +78,7 @@ export async function createStore(req, res, next) {
 export async function updateStore(req, res, next) {
     const storeId = +req.params.id
     const ownerId = +req.user.id
-    const { store_type, pet_type, total_storeentry, total_table, total_pet, summary, address, price, open_datetime } = req.body
+    const { store_name, store_type, pet_type, total_storeentry, total_table, total_pet, summary, address, price, open_datetime } = req.body
 
     const store = await prisma.store.findUnique({ where: { id: storeId } })
     if (!store) {

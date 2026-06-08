@@ -128,7 +128,7 @@ model Review {
   reservation_id Int    @unique
   user_id        Int
   rating         Int
-  comment        String @db.VarChar(1000)
+  comment        String @db.Text
   store_id       Int
 
   // Relations
@@ -155,6 +155,10 @@ model Media {
   // Relations
   review Review? @relation("ReviewMedia", fields: [review_id], references: [id])
   store  Store?  @relation("StoreMedia", fields: [store_id], references: [id])
+
+  @@map("media")
+}
+ore_id], references: [id])
 
   @@map("media")
 }
